@@ -1,59 +1,50 @@
-// const { createReadStream } = require("fs")
-// const { createInterface } = require("readline")
-
-// const INPUT_FILE_PATH = "styles.css"
-// /**
-//  * `encoding` set to UNICODE, so we will receive text directly instead of Buffer objects
-//  */
-// const inputStream = createReadStream(INPUT_FILE_PATH)
-
-// const lineFeed = createInterface(inputStream, { encoding: "utf-8"} )
-
-// lineFeed.on("line", (line) => {
-//   console.log("LINE: ", line)
-// })
-
-// inputStream.on("end", () => {
-//   inputStream.close()
-//   lineFeed.close()
-// })
-
-// const fs = require("fs");
-
-const readline = require("readline");
 const fs = require("fs");
 
-const INPUT_FILE_PATH = "Book1.csv";
+const csvReadStream = fs.createReadStream("input.csv", { encoding: "utf-8" });
 
-const fileReadStream = fs.createReadStream(INPUT_FILE_PATH, {
-  encoding: "utf-8",
-});
+let arrow = "-->";
+let result = "";
+let dataTempStore = "";
 
-const rows = [];
-
-const lineFeed = readline.createInterface(fileReadStream);
-
-lineFeed.on("line", (line) => {
-  let data = line.split(",");
-  rows.push(data);
-});
-
-fileReadStream.on("end", () => {
-  fileReadStream.close();
-  lineFeed.close();
-
-  let result = [];
-  let headers = rows.shift();
-
-  for (let i = 0; i < rows.length; i++) {
-    let row = rows[i];
-    let rowData = {};
-
-    for (let j = 0; j < headers.length; j++) {
-      rowData[headers[j]] = row[j];
+csvReadStream.on("data", (data) => {
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] === ":" || data[i] === ",") {
+      result = result + dataTempStore + ",";
+      dataTempStore = "";
+    } else {
+      dataTempStore = dataTempStore + data[i];
     }
-    result.push(rowData);
   }
+  result = result + dataTempStore;
+  dataTempStore = "";
 
-  console.log(result)
+  for (let i = 0; i < result.length; i++) {
+    if (result[i] !== " ") {
+      dataTempStore = dataTempStore + result[i];
+    }
+  }
+  result = dataTempStore;
+  dataTempStore = "";
+  let array = [];
+  let count = 0;
+
+  for (let i = 0; i < result.length; i++) {
+    if (result[i] === '"' || result[i] === ",") {
+      if (result[i] === '"') {
+        count++;
+        if (count === 2) {
+          array.push(dataTempStore);
+          dataTempStore = "";
+          count = 0;
+        }
+      }
+    } else {
+      dataTempStore = dataTempStore + result[i];
+    }
+  }
+  result = "";
+  for (let i = 0; i < array.length; i = i + 2) {
+    result = result + `${array[i]} ` + arrow + ` ${array[i + 1]}\n`;
+  }
+  console.log(result);
 });
