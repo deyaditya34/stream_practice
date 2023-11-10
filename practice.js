@@ -15,6 +15,7 @@ csvReadStream.on("data", (data) => {
       dataTempStore = dataTempStore + data[i];
     }
   }
+
   result = result + dataTempStore;
   dataTempStore = "";
 
@@ -43,8 +44,15 @@ csvReadStream.on("data", (data) => {
     }
   }
   result = "";
+  let obj = {};
   for (let i = 0; i < array.length; i = i + 2) {
-    result = result + `${array[i]} ` + arrow + ` ${array[i + 1]}\n`;
+    obj[array[i]] = array[i + 1];
   }
-  console.log(result);
+
+  console.log(obj);
+
+  // for (let i = 0; i < array.length; i = i + 2) {
+  //   result = result + `${array[i]} ` + arrow + ` ${array[i + 1]}\n`;
+  // }
+  // console.log(result);
 });
